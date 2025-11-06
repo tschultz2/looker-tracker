@@ -42,14 +42,32 @@
     h2 { margin-top: 1rem; }
     p { color: #555; margin-bottom: 0.5rem; }
 
+    /* Stylish dropdown */
     select {
-      padding: 0.5rem 1rem;
+      padding: 0.6rem 1.2rem;
       margin-bottom: 1rem;
       font-size: 1rem;
-      border-radius: 5px;
+      border-radius: 8px;
       border: 1px solid #ccc;
+      background-color: #ffffff;
+      color: #333;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     }
 
+    select:hover {
+      border-color: #888;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    select:focus {
+      outline: none;
+      border-color: #4a90e2;
+      box-shadow: 0 0 0 3px rgba(74,144,226,0.3);
+    }
+
+    /* Zoomed-out responsive iframe */
     .iframe-container {
       position: relative;
       width: 100%;
@@ -89,22 +107,31 @@
 
     document.getElementById('viewer-label').innerText = `Viewer: ${viewer}`;
 
-    // Map of report aliases → Looker Studio embed URLs
+    // Map of report aliases → Looker Studio embed URLs + friendly names
     const REPORT_MAP = {
-      listeningpost: "https://lookerstudio.google.com/embed/reporting/d411cbda-612b-47c1-9519-df9fcc154bf7/page/0qETF",
-      organizingdash: "https://lookerstudio.google.com/embed/reporting/746fdfe6-7b8c-40e5-8d95-bbf9aea22565/page/0qETF",
-      udfdash: "https://lookerstudio.google.com/embed/reporting/b5321080-42e0-4667-ab06-45e47f419ded/page/0qETF"
+      listeningpost: {
+        url: "https://lookerstudio.google.com/embed/reporting/d411cbda-612b-47c1-9519-df9fcc154bf7/page/0qETF",
+        display: "Listening Post"
+      },
+      organizingdash: {
+        url: "https://lookerstudio.google.com/embed/reporting/746fdfe6-7b8c-40e5-8d95-bbf9aea22565/page/0qETF",
+        display: "Organizing Dashboard"
+      },
+      udfdash: {
+        url: "https://lookerstudio.google.com/embed/reporting/b5321080-42e0-4667-ab06-45e47f419ded/page/0qETF",
+        display: "UDF Dashboard"
+      }
     };
 
     const iframe = document.getElementById('report-frame');
     const select = document.getElementById('report-select');
     const title = document.getElementById('title');
 
-    // Populate dropdown
+    // Populate dropdown with friendly names
     Object.keys(REPORT_MAP).forEach(key => {
       const option = document.createElement('option');
       option.value = key;
-      option.text = key.charAt(0).toUpperCase() + key.slice(1);
+      option.text = REPORT_MAP[key].display; // friendly name
       select.appendChild(option);
     });
 
@@ -114,8 +141,8 @@
     // Function to load report
     function loadReport(reportKey) {
       if (REPORT_MAP[reportKey]) {
-        iframe.src = REPORT_MAP[reportKey];
-        title.innerText = `Now Viewing: ${reportKey}`;
+        iframe.src = REPORT_MAP[reportKey].url;
+        title.innerText = `Now Viewing: ${REPORT_MAP[reportKey].display}`;
         trackReportView(viewer, reportKey);
       } else {
         iframe.style.display = 'none';
