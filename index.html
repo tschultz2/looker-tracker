@@ -67,20 +67,20 @@
 
     // Map of report aliases → Looker Studio report IDs
     const REPORT_MAP = {
-      listeningpost: "d411cbda-612b-47c1-9519-df9fcc154bf7",
-      organizingdash: "746fdfe6-7b8c-40e5-8d95-bbf9aea22565",
-      udfdash: "b5321080-42e0-4667-ab06-45e47f419ded"
+      listeningpost: "https://lookerstudio.google.com/embed/reporting/d411cbda-612b-47c1-9519-df9fcc154bf7/page/0qETF",
+      organizingdash: "https://lookerstudio.google.com/embed/reporting/746fdfe6-7b8c-40e5-8d95-bbf9aea22565/page/0qETF",
+      udfdash: "https://lookerstudio.google.com/embed/reporting/b5321080-42e0-4667-ab06-45e47f419ded/page/0qETF"
       // add more reports here
     };
 
     const iframe = document.getElementById('report-frame');
 
-    if (REPORT_MAP[report]) {
-      iframe.src = `https://lookerstudio.google.com/embed/reporting/${REPORT_MAP[report]}`;
-    } else {
-      iframe.style.display = 'none';
-      document.getElementById('title').innerText = 'Unknown report';
-    }
+  if (REPORT_MAP[report]) {
+    iframe.src = REPORT_MAP[report];
+  } else {
+    iframe.style.display = 'none';
+    document.getElementById('title').innerText = 'Unknown report';
+  }
   </script>
 </body>
 </html>
