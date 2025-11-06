@@ -19,17 +19,15 @@
       return urlParams.get(param);
     }
 
-    // Track report view
-    const viewerId = getUrlParam('viewer') || 'unknown_viewer';
-    const reportId = getUrlParam('report') || 'unknown_report';
-
-    gtag('event', 'report_view', {
-      viewer_id: viewerId,
-      report_id: reportId,
-      timestamp: new Date().toISOString()
-    });
-
-    console.log(`Tracking: ${viewerId} viewed ${reportId}`);
+    // GA4 tracking function
+    function trackReportView(viewer, report) {
+      gtag('event', 'report_view', {
+        viewer_id: viewer,
+        report_id: report,
+        timestamp: new Date().toISOString()
+      });
+      console.log(`Tracking: ${viewer} viewed ${report}`);
+    }
   </script>
 
   <style>
@@ -42,9 +40,16 @@
     }
 
     h2 { margin-top: 1rem; }
-    p { color: #555; }
+    p { color: #555; margin-bottom: 0.5rem; }
 
-    /* Zoomed-out responsive iframe */
+    select {
+      padding: 0.5rem 1rem;
+      margin-bottom: 1rem;
+      font-size: 1rem;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+
     .iframe-container {
       position: relative;
       width: 100%;
@@ -57,10 +62,10 @@
       position: absolute;
       top: 0;
       left: 0;
-      width: 125%;           /* increase width to allow zoom out */
-      height: 125%;          /* increase height */
+      width: 125%;           /* zoom out */
+      height: 125%;
       border: none;
-      transform: scale(0.8); /* zoom out to 80% */
+      transform: scale(0.8);
       transform-origin: top left;
       border-radius: 8px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
@@ -71,33 +76,61 @@
   <h2 id="title">Loading Report...</h2>
   <p id="viewer-label"></p>
 
+  <!-- Dropdown to switch reports -->
+  <select id="report-select"></select>
+
   <div class="iframe-container">
     <iframe id="report-frame" allowfullscreen></iframe>
   </div>
 
   <script>
     const viewer = getUrlParam('viewer') || 'Anonymous';
-    const report = getUrlParam('report') || 'unknown_report';
+    let report = getUrlParam('report') || 'listeningpost'; // default report
 
     document.getElementById('viewer-label').innerText = `Viewer: ${viewer}`;
-    document.getElementById('title').innerText = `Now Viewing: ${report}`;
 
     // Map of report aliases → Looker Studio embed URLs
     const REPORT_MAP = {
       listeningpost: "https://lookerstudio.google.com/embed/reporting/d411cbda-612b-47c1-9519-df9fcc154bf7/page/0qETF",
       organizingdash: "https://lookerstudio.google.com/embed/reporting/746fdfe6-7b8c-40e5-8d95-bbf9aea22565/page/0qETF",
       udfdash: "https://lookerstudio.google.com/embed/reporting/b5321080-42e0-4667-ab06-45e47f419ded/page/0qETF"
-      // add more reports here
     };
 
     const iframe = document.getElementById('report-frame');
+    const select = document.getElementById('report-select');
+    const title = document.getElementById('title');
 
-    if (REPORT_MAP[report]) {
-      iframe.src = REPORT_MAP[report];
-    } else {
-      iframe.style.display = 'none';
-      document.getElementById('title').innerText = 'Unknown report';
+    // Populate dropdown
+    Object.keys(REPORT_MAP).forEach(key => {
+      const option = document.createElement('option');
+      option.value = key;
+      option.text = key.charAt(0).toUpperCase() + key.slice(1);
+      select.appendChild(option);
+    });
+
+    // Set initial selection
+    select.value = report;
+
+    // Function to load report
+    function loadReport(reportKey) {
+      if (REPORT_MAP[reportKey]) {
+        iframe.src = REPORT_MAP[reportKey];
+        title.innerText = `Now Viewing: ${reportKey}`;
+        trackReportView(viewer, reportKey);
+      } else {
+        iframe.style.display = 'none';
+        title.innerText = 'Unknown report';
+      }
     }
+
+    // Load initial report
+    loadReport(report);
+
+    // Listen for dropdown changes
+    select.addEventListener('change', (e) => {
+      report = e.target.value;
+      loadReport(report);
+    });
   </script>
 </body>
 </html>
