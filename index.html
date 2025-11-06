@@ -8,7 +8,6 @@
   <!-- GA4 Tracking -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-JLN8ZLNXFD"></script>
   <script>
-    // Replace with your GA4 Measurement ID
     window.dataLayer = window.dataLayer || [];
     function gtag(){ dataLayer.push(arguments); }
     gtag('js', new Date());
@@ -41,13 +40,28 @@
       padding: 0;
       text-align: center;
     }
+
     h2 { margin-top: 1rem; }
     p { color: #555; }
-    iframe {
-      width: 95%;
-      height: 90vh;
+
+    /* Zoomed-out responsive iframe */
+    .iframe-container {
+      position: relative;
+      width: 100%;
+      padding-bottom: 75%; /* aspect ratio */
+      height: 0;
+      overflow: hidden;
+    }
+
+    .iframe-container iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 125%;           /* increase width to allow zoom out */
+      height: 125%;          /* increase height */
       border: none;
-      margin-top: 0.5rem;
+      transform: scale(0.8); /* zoom out to 80% */
+      transform-origin: top left;
       border-radius: 8px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
@@ -56,7 +70,10 @@
 <body>
   <h2 id="title">Loading Report...</h2>
   <p id="viewer-label"></p>
-  <iframe id="report-frame" allowfullscreen></iframe>
+
+  <div class="iframe-container">
+    <iframe id="report-frame" allowfullscreen></iframe>
+  </div>
 
   <script>
     const viewer = getUrlParam('viewer') || 'Anonymous';
@@ -65,7 +82,7 @@
     document.getElementById('viewer-label').innerText = `Viewer: ${viewer}`;
     document.getElementById('title').innerText = `Now Viewing: ${report}`;
 
-    // Map of report aliases → Looker Studio report IDs
+    // Map of report aliases → Looker Studio embed URLs
     const REPORT_MAP = {
       listeningpost: "https://lookerstudio.google.com/embed/reporting/d411cbda-612b-47c1-9519-df9fcc154bf7/page/0qETF",
       organizingdash: "https://lookerstudio.google.com/embed/reporting/746fdfe6-7b8c-40e5-8d95-bbf9aea22565/page/0qETF",
@@ -75,12 +92,12 @@
 
     const iframe = document.getElementById('report-frame');
 
-  if (REPORT_MAP[report]) {
-    iframe.src = REPORT_MAP[report];
-  } else {
-    iframe.style.display = 'none';
-    document.getElementById('title').innerText = 'Unknown report';
-  }
+    if (REPORT_MAP[report]) {
+      iframe.src = REPORT_MAP[report];
+    } else {
+      iframe.style.display = 'none';
+      document.getElementById('title').innerText = 'Unknown report';
+    }
   </script>
 </body>
 </html>
