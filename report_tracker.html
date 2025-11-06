@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Looker Studio Report Tracker</title>
+
+  <!-- GA4 Tracking -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-JLN8ZLNXFD"></script>
+  <script>
+    // Replace with your GA4 Measurement ID
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-JLN8ZLNXFD');  // <-- your GA4 ID
+
+    // Helper to get URL parameters
+    function getUrlParam(param) {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(param);
+    }
+
+    // Track report view
+    const viewerId = getUrlParam('viewer') || 'unknown_viewer';
+    const reportId = getUrlParam('report') || 'unknown_report';
+
+    gtag('event', 'report_view', {
+      viewer_id: viewerId,
+      report_id: reportId,
+      timestamp: new Date().toISOString()
+    });
+
+    console.log(`Tracking: ${viewerId} viewed ${reportId}`);
+  </script>
+
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      background: #f9fafb;
+      margin: 0;
+      padding: 0;
+      text-align: center;
+    }
+    h2 { margin-top: 1rem; }
+    p { color: #555; }
+    iframe {
+      width: 95%;
+      height: 90vh;
+      border: none;
+      margin-top: 0.5rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+  </style>
+</head>
+<body>
+  <h2 id="title">Loading Report...</h2>
+  <p id="viewer-label"></p>
+  <iframe id="report-frame" allowfullscreen></iframe>
+
+  <script>
+    const viewer = getUrlParam('viewer') || 'Anonymous';
+    const report = getUrlParam('report') || 'unknown_report';
+
+    document.getElementById('viewer-label').innerText = `Viewer: ${viewer}`;
+    document.getElementById('title').innerText = `Now Viewing: ${report}`;
+
+    // Map of report aliases → Looker Studio report IDs
+    const REPORT_MAP = {
+      listeningpost: "d411cbda-612b-47c1-9519-df9fcc154bf7",
+      organizingdash: "746fdfe6-7b8c-40e5-8d95-bbf9aea22565",
+      udfdash: "b5321080-42e0-4667-ab06-45e47f419ded"
+      // add more reports here
+    };
+
+    const iframe = document.getElementById('report-frame');
+
+    if (REPORT_MAP[report]) {
+      iframe.src = `https://lookerstudio.google.com/embed/reporting/${REPORT_MAP[report]}`;
+    } else {
+      iframe.style.display = 'none';
+      document.getElementById('title').innerText = 'Unknown report';
+    }
+  </script>
+</body>
+</html>
