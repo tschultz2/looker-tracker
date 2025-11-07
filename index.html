@@ -29,33 +29,24 @@
   </script>
 
   <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      width: 100%;
+    body {
       font-family: system-ui, sans-serif;
       background: #f9fafb;
-    }
-
-    body {
+      margin: 0;
+      padding: 0;
+      text-align: center;
+      height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
     }
 
-    h2 {
-      margin-top: 1rem;
-    }
-
-    p {
-      color: #555;
-      margin: 0.25rem 0 0.75rem 0;
-    }
+    h2 { margin-top: 1rem; }
+    p { color: #555; margin-bottom: 0.5rem; }
 
     select {
       padding: 0.5rem 1rem;
-      margin-bottom: 0.5rem;
+      margin-bottom: 1rem;
       font-size: 1rem;
       border-radius: 5px;
       border: 1px solid #ccc;
@@ -65,23 +56,42 @@
     select:hover { border-color: #888; }
 
     .iframe-container {
+      position: relative;
       flex: 1;
       width: 100%;
-      max-width: 1600px;
-      padding: 0 1rem; /* horizontal padding for wide screens */
+      max-width: none;
       display: flex;
-      justify-content: center;
+      justify-content: flex-start;  /* align top-left */
       align-items: flex-start;
-      overflow: hidden;
-      box-sizing: border-box;
+      overflow: auto;               /* allow scrolling if needed */
+      padding: 0 0.5rem;
     }
 
     .iframe-container iframe {
-      width: 100%;
-      height: 100%;
+      width: 140%;                  /* wider to show full dropdowns */
+      height: 130%;
       border: none;
+      transform: scale(0.75);       /* zoom out */
+      transform-origin: top left;   /* anchor top-left */
       border-radius: 10px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      transition: transform 0.3s ease;
+    }
+
+    @media (max-width: 1024px) {
+      .iframe-container iframe {
+        width: 130%;
+        height: 120%;
+        transform: scale(0.8);
+      }
+    }
+
+    @media (max-width: 600px) {
+      .iframe-container iframe {
+        width: 100%;
+        height: 100%;
+        transform: scale(1);
+      }
     }
   </style>
 </head>
@@ -90,6 +100,7 @@
   <h2 id="title">Loading Report...</h2>
   <p id="viewer-label"></p>
 
+  <!-- Dropdown to switch reports -->
   <select id="report-select"></select>
 
   <div class="iframe-container">
@@ -99,6 +110,7 @@
   <script>
     const viewer = getUrlParam('viewer') || 'Anonymous';
     let report = getUrlParam('report') || 'listeningpost';
+
     document.getElementById('viewer-label').innerText = `Viewer: ${viewer}`;
 
     const REPORT_MAP = {
@@ -117,9 +129,11 @@
     };
 
     const iframe = document.getElementById('report-frame');
+    const container = document.querySelector('.iframe-container');
     const select = document.getElementById('report-select');
     const title = document.getElementById('title');
 
+    // Populate dropdown
     Object.keys(REPORT_MAP).forEach(key => {
       const option = document.createElement('option');
       option.value = key;
@@ -135,11 +149,9 @@
         title.innerText = `Now Viewing: ${REPORT_MAP[reportKey].display}`;
         trackReportView(viewer, reportKey);
 
-        // Update URL for sharing
-        const newUrl = new URL(window.location);
-        newUrl.searchParams.set('report', reportKey);
-        newUrl.searchParams.set('viewer', viewer);
-        window.history.replaceState({}, '', newUrl);
+        // Ensure top-left is visible
+        container.scrollLeft = 0;
+        container.scrollTop = 0;
       } else {
         iframe.style.display = 'none';
         title.innerText = 'Unknown Report';
@@ -153,15 +165,11 @@
       loadReport(report);
     });
 
-    // Dynamically adjust iframe height to fill viewport
-    function resizeIframe() {
-      const container = document.querySelector('.iframe-container');
-      const topOffset = container.offsetTop;
-      container.style.height = (window.innerHeight - topOffset - 10) + 'px';
-    }
-
-    window.addEventListener('resize', resizeIframe);
-    resizeIframe();
+    // Reset scroll to top-left whenever iframe loads a new report
+    iframe.addEventListener('load', () => {
+      container.scrollLeft = 0;
+      container.scrollTop = 0;
+    });
   </script>
 </body>
 </html>
