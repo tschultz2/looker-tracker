@@ -11,15 +11,13 @@
     window.dataLayer = window.dataLayer || [];
     function gtag(){ dataLayer.push(arguments); }
     gtag('js', new Date());
-    gtag('config', 'G-JLN8ZLNXFD');  // <-- your GA4 Measurement ID
+    gtag('config', 'G-JLN8ZLNXFD');
 
-    // Helper: get URL parameters
     function getUrlParam(param) {
       const urlParams = new URLSearchParams(window.location.search);
       return urlParams.get(param);
     }
 
-    // Track a report view in GA4
     function trackReportView(viewer, report) {
       gtag('event', 'report_view', {
         viewer_id: viewer,
@@ -31,13 +29,16 @@
   </script>
 
   <style>
-    body {
-      font-family: system-ui, sans-serif;
-      background: #f9fafb;
+    html, body {
       margin: 0;
       padding: 0;
-      text-align: center;
-      height: 100vh;
+      height: 100%;
+      width: 100%;
+      font-family: system-ui, sans-serif;
+      background: #f9fafb;
+    }
+
+    body {
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -49,59 +50,38 @@
 
     p {
       color: #555;
-      margin-bottom: 0.5rem;
+      margin: 0.25rem 0 0.75rem 0;
     }
 
     select {
       padding: 0.5rem 1rem;
-      margin-bottom: 1rem;
+      margin-bottom: 0.5rem;
       font-size: 1rem;
       border-radius: 5px;
       border: 1px solid #ccc;
       cursor: pointer;
     }
 
-    select:hover {
-      border-color: #888;
-    }
+    select:hover { border-color: #888; }
 
     .iframe-container {
-      position: relative;
       flex: 1;
       width: 100%;
       max-width: 1600px;
+      padding: 0 1rem; /* horizontal padding for wide screens */
       display: flex;
       justify-content: center;
-      align-items: center;
+      align-items: flex-start;
       overflow: hidden;
-      padding: 0 0.5rem;
+      box-sizing: border-box;
     }
 
     .iframe-container iframe {
-      width: 120%;
-      height: 120%;
+      width: 100%;
+      height: 100%;
       border: none;
-      transform: scale(0.75);
-      transform-origin: top center;
       border-radius: 10px;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-      transition: transform 0.3s ease;
-    }
-
-    /* Tablet view adjustments */
-    @media (max-width: 1024px) {
-      .iframe-container iframe {
-        transform: scale(0.85);
-      }
-    }
-
-    /* Mobile view adjustments */
-    @media (max-width: 600px) {
-      .iframe-container iframe {
-        transform: scale(1);
-        width: 100%;
-        height: 100%;
-      }
     }
   </style>
 </head>
@@ -110,7 +90,6 @@
   <h2 id="title">Loading Report...</h2>
   <p id="viewer-label"></p>
 
-  <!-- Dropdown for selecting reports -->
   <select id="report-select"></select>
 
   <div class="iframe-container">
@@ -119,11 +98,9 @@
 
   <script>
     const viewer = getUrlParam('viewer') || 'Anonymous';
-    let report = getUrlParam('report') || 'listeningpost'; // Default report
-
+    let report = getUrlParam('report') || 'listeningpost';
     document.getElementById('viewer-label').innerText = `Viewer: ${viewer}`;
 
-    // Report name → Looker Studio embed URL + display name
     const REPORT_MAP = {
       listeningpost: {
         url: "https://lookerstudio.google.com/embed/reporting/d411cbda-612b-47c1-9519-df9fcc154bf7/page/0qETF",
@@ -143,7 +120,6 @@
     const select = document.getElementById('report-select');
     const title = document.getElementById('title');
 
-    // Populate dropdown
     Object.keys(REPORT_MAP).forEach(key => {
       const option = document.createElement('option');
       option.value = key;
@@ -151,29 +127,41 @@
       select.appendChild(option);
     });
 
-    // Set initial dropdown selection
     select.value = report;
 
-    // Load the selected report
     function loadReport(reportKey) {
       if (REPORT_MAP[reportKey]) {
         iframe.src = REPORT_MAP[reportKey].url;
         title.innerText = `Now Viewing: ${REPORT_MAP[reportKey].display}`;
         trackReportView(viewer, reportKey);
+
+        // Update URL for sharing
+        const newUrl = new URL(window.location);
+        newUrl.searchParams.set('report', reportKey);
+        newUrl.searchParams.set('viewer', viewer);
+        window.history.replaceState({}, '', newUrl);
       } else {
         iframe.style.display = 'none';
         title.innerText = 'Unknown Report';
       }
     }
 
-    // Load initial report
     loadReport(report);
 
-    // Update when dropdown changes
     select.addEventListener('change', (e) => {
       report = e.target.value;
       loadReport(report);
     });
+
+    // Dynamically adjust iframe height to fill viewport
+    function resizeIframe() {
+      const container = document.querySelector('.iframe-container');
+      const topOffset = container.offsetTop;
+      container.style.height = (window.innerHeight - topOffset - 10) + 'px';
+    }
+
+    window.addEventListener('resize', resizeIframe);
+    resizeIframe();
   </script>
 </body>
 </html>
