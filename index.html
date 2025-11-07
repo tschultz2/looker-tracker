@@ -11,15 +11,15 @@
     window.dataLayer = window.dataLayer || [];
     function gtag(){ dataLayer.push(arguments); }
     gtag('js', new Date());
-    gtag('config', 'G-JLN8ZLNXFD');  // <-- your GA4 ID
+    gtag('config', 'G-JLN8ZLNXFD');  // <-- your GA4 Measurement ID
 
-    // Helper to get URL parameters
+    // Helper: get URL parameters
     function getUrlParam(param) {
       const urlParams = new URLSearchParams(window.location.search);
       return urlParams.get(param);
     }
 
-    // GA4 tracking function
+    // Track a report view in GA4
     function trackReportView(viewer, report) {
       gtag('event', 'report_view', {
         viewer_id: viewer,
@@ -37,10 +37,20 @@
       margin: 0;
       padding: 0;
       text-align: center;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
 
-    h2 { margin-top: 1rem; }
-    p { color: #555; margin-bottom: 0.5rem; }
+    h2 {
+      margin-top: 1rem;
+    }
+
+    p {
+      color: #555;
+      margin-bottom: 0.5rem;
+    }
 
     select {
       padding: 0.5rem 1rem;
@@ -57,31 +67,50 @@
 
     .iframe-container {
       position: relative;
+      flex: 1;
       width: 100%;
-      padding-bottom: 75%; /* aspect ratio */
-      height: 0;
+      max-width: 1600px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
       overflow: hidden;
+      padding: 0 0.5rem;
     }
 
     .iframe-container iframe {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 125%;           /* zoom out */
-      height: 125%;
+      width: 120%;
+      height: 120%;
       border: none;
-      transform: scale(0.8);
-      transform-origin: top left;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      transform: scale(0.75);
+      transform-origin: top center;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease;
+    }
+
+    /* Tablet view adjustments */
+    @media (max-width: 1024px) {
+      .iframe-container iframe {
+        transform: scale(0.85);
+      }
+    }
+
+    /* Mobile view adjustments */
+    @media (max-width: 600px) {
+      .iframe-container iframe {
+        transform: scale(1);
+        width: 100%;
+        height: 100%;
+      }
     }
   </style>
 </head>
+
 <body>
   <h2 id="title">Loading Report...</h2>
   <p id="viewer-label"></p>
 
-  <!-- Dropdown to switch reports -->
+  <!-- Dropdown for selecting reports -->
   <select id="report-select"></select>
 
   <div class="iframe-container">
@@ -90,11 +119,11 @@
 
   <script>
     const viewer = getUrlParam('viewer') || 'Anonymous';
-    let report = getUrlParam('report') || 'listeningpost'; // default report
+    let report = getUrlParam('report') || 'listeningpost'; // Default report
 
     document.getElementById('viewer-label').innerText = `Viewer: ${viewer}`;
 
-    // Map of report aliases → Looker Studio embed URLs + friendly names
+    // Report name → Looker Studio embed URL + display name
     const REPORT_MAP = {
       listeningpost: {
         url: "https://lookerstudio.google.com/embed/reporting/d411cbda-612b-47c1-9519-df9fcc154bf7/page/0qETF",
@@ -114,18 +143,18 @@
     const select = document.getElementById('report-select');
     const title = document.getElementById('title');
 
-    // Populate dropdown with friendly names
+    // Populate dropdown
     Object.keys(REPORT_MAP).forEach(key => {
       const option = document.createElement('option');
       option.value = key;
-      option.text = REPORT_MAP[key].display; // friendly name
+      option.text = REPORT_MAP[key].display;
       select.appendChild(option);
     });
 
-    // Set initial selection
+    // Set initial dropdown selection
     select.value = report;
 
-    // Function to load report
+    // Load the selected report
     function loadReport(reportKey) {
       if (REPORT_MAP[reportKey]) {
         iframe.src = REPORT_MAP[reportKey].url;
@@ -133,14 +162,14 @@
         trackReportView(viewer, reportKey);
       } else {
         iframe.style.display = 'none';
-        title.innerText = 'Unknown report';
+        title.innerText = 'Unknown Report';
       }
     }
 
     // Load initial report
     loadReport(report);
 
-    // Listen for dropdown changes
+    // Update when dropdown changes
     select.addEventListener('change', (e) => {
       report = e.target.value;
       loadReport(report);
