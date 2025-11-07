@@ -61,21 +61,22 @@
       width: 100%;
       max-width: none;
       display: flex;
-      justify-content: flex-start;  /* align top-left */
-      align-items: flex-start;
-      overflow: auto;               /* allow scrolling if needed */
-      padding: 0 0.5rem;
+      justify-content: center;  /* center horizontally */
+      align-items: flex-start;  /* align top */
+      overflow-x: auto;         /* allow horizontal scrolling */
+      overflow-y: auto;         /* allow vertical scrolling */
+      padding: 0.5rem;
+      box-sizing: border-box;
     }
 
     .iframe-container iframe {
-      width: 140%;                  /* wider to show full dropdowns */
+      width: 140%;             /* wider to show full report */
       height: 130%;
       border: none;
-      transform: scale(0.75);       /* zoom out */
-      transform-origin: top left;   /* anchor top-left */
+      transform: scale(0.75);  /* zoom out */
+      transform-origin: top left;
       border-radius: 10px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      transition: transform 0.3s ease;
     }
 
     @media (max-width: 1024px) {
@@ -129,7 +130,6 @@
     };
 
     const iframe = document.getElementById('report-frame');
-    const container = document.querySelector('.iframe-container');
     const select = document.getElementById('report-select');
     const title = document.getElementById('title');
 
@@ -148,10 +148,6 @@
         iframe.src = REPORT_MAP[reportKey].url;
         title.innerText = `Now Viewing: ${REPORT_MAP[reportKey].display}`;
         trackReportView(viewer, reportKey);
-
-        // Ensure top-left is visible
-        container.scrollLeft = 0;
-        container.scrollTop = 0;
       } else {
         iframe.style.display = 'none';
         title.innerText = 'Unknown Report';
@@ -163,12 +159,6 @@
     select.addEventListener('change', (e) => {
       report = e.target.value;
       loadReport(report);
-    });
-
-    // Reset scroll to top-left whenever iframe loads a new report
-    iframe.addEventListener('load', () => {
-      container.scrollLeft = 0;
-      container.scrollTop = 0;
     });
   </script>
 </body>
